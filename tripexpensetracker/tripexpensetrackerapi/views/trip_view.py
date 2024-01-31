@@ -67,6 +67,22 @@ class TripView(ViewSet):
         except Exception as e:
             return Response({'message': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @action(methods=['post'], detail=True)
+    def add_trip_expense(self, request, pk):
+        """Post request for a user to add an expense to a trip."""
+        try:
+            expense = Expense.objects.get(pk=request.data["expense"])
+            trip = Trip.objects.get(pk=pk)
+            
+            trip.expenses.add(expense)
+            return Response({'message': 'Expense added to trip'}, status=status.HTTP_201_CREATED)
+        except Expense.DoesNotExist:
+            return Response({'error': 'Expense not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Trip.DoesNotExist:
+            return Response({'error': 'Trip not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @action(methods=['delete'], detail=True)
     def remove_trip_expense(self, request, pk):
         """Delete request for a user to remove an expense from a trip."""
