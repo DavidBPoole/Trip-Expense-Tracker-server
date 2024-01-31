@@ -13,9 +13,29 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
+from tripexpensetracker.tripexpensetrackerapi.views.category_view import CategoryView
+from tripexpensetracker.tripexpensetrackerapi.views.expense_category_view import ExpenseCategoryView
+from tripexpensetracker.tripexpensetrackerapi.views.expense_view import ExpenseView
+from tripexpensetracker.tripexpensetrackerapi.views.trip_view import TripView
+from tripexpensetracker.tripexpensetrackerapi.views.user_view import UserView
+from tripexpensetracker.tripexpensetrackerapi.views.user_auth import check_user, register_user
+
+
+router = routers.DefaultRouter(trailing_slash=False)
+
+router.register(r'users', UserView, 'user')
+router.register(r'trips', TripView, 'trip')
+router.register(r'expenses', ExpenseView, 'expense')
+router.register(r'expensecategories', ExpenseCategoryView, 'expensecategory')
+router.register(r'categories', CategoryView, 'category')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('', include(router.urls)),
+    # Authentication-related paths
+    path('checkuser/', check_user, name='check-user'),
+    path('register/', register_user, name='register-user'),
+    path('trips/<int:pk>/add_expense/', TripView.as_view({'post': 'add_trip_expense'}), name='trip-add-expense'),
+    path('trips/<int:pk>/remove_trip_expense/', TripView.as_view({'delete': 'remove_trip_expense'}), name='trip-remove-expense'),
 ]
