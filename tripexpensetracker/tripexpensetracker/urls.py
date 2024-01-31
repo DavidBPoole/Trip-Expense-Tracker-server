@@ -34,8 +34,8 @@ router.register(r'categories', CategoryView, 'category')
 urlpatterns = [
     path('', include(router.urls)),
     # Authentication-related paths
-    path('checkuser/', check_user, name='check-user'),
-    path('register/', register_user, name='register-user'),
-    path('trips/<int:pk>/add_expense/', TripView.as_view({'post': 'add_trip_expense'}), name='trip-add-expense'),
-    path('trips/<int:pk>/remove_trip_expense/', TripView.as_view({'delete': 'remove_trip_expense'}), name='trip-remove-expense'),
+    path('checkuser', check_user, name='check-user'),
+    path('register', register_user, name='register-user'),
+    path('trips/<int:pk>/add_expense', TripView.as_view({'post': 'add_trip_expense'}), name='trip-add-expense'),
+    path('trips/<int:pk>/remove_trip_expense', TripView.as_view({'delete': 'remove_trip_expense'}), name='trip-remove-expense'),
 ]
