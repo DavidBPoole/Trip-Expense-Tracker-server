@@ -3,7 +3,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers, status
 from rest_framework.decorators import action
-from tripexpensetrackerapi.models import Expense, User, Category
+from tripexpensetrackerapi.models import Expense, User, Category, ExpenseCategory
 from tripexpensetrackerapi.views.expense_category_view import ExpenseCategorySerializer
 
 class ExpenseView(ViewSet):
@@ -91,6 +91,36 @@ class ExpenseView(ViewSet):
             return Response({'message': 'Expense not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'message': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+    # ADD/REMOVE EXPENSECATEGORY
+
+    @action(methods=['post'], detail=True)
+    def add_expense_category(self, request, pk):
+        """Post request for a user to add a category to an expense"""
+
+        category = Category.objects.get(pk=request.data["category"])
+        expense = Expense.objects.get(pk=pk)
+        expensecategory = ExpenseCategory.objects.create(
+            category=category,
+            expense=expense,
+        )
+        return Response({'message': 'Category added to expense'}, status=status.HTTP_201_CREATED)
+
+    @action(methods=['delete'], detail=True)
+    def remove_expense_category(self, request, pk):
+        """Delete request for a user to remove a category from an expense"""
+
+        expensecategory_id = request.data.get("expense_category")
+        if not expensecategory_id:
+            return Response({"error": "Order item ID not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            expense_category = ExpenseCategory.objects.get(pk=expensecategory_id, order__pk=pk)
+            expense_category.delete()
+            return Response({"message": "Expense category removed"}, status=status.HTTP_204_NO_CONTENT)
+        except ExpenseCategory.DoesNotExist:
+            return Response({"error": "Expense category not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class ExpenseSerializer(serializers.ModelSerializer):
     """JSON serializer for expenses."""
